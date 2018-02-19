@@ -45,6 +45,7 @@
 #include "fcitx/context.h"
 #include "fcitx-utils/utils.h"
 #include "at-esc.h"
+#include "at-esc-util.h"
 
 #define _(x) dgettext("fcitx-at-esc", (x))
 
@@ -58,14 +59,14 @@ typedef struct _FcitxAtEsc {
 } FcitxAtEsc;
 
 void* AtEscCreate(FcitxInstance* instance);
-void ToggleAtEscState(void* arg);
+void ToggleatEscState(void* arg);
 boolean GetAtEscEnabled(void* arg);
 boolean LoadAtEscConfig(FcitxAtEsc* atEscState);
 static FcitxConfigFileDesc* GetAtEscConfigDesc();
 void SaveAtEscConfig(FcitxAtEsc* atEscState);
 void ReloadAtEsc(void* arg);
-INPUT_RETURN_VALUE HotkeyToggleAtEscState(void* arg);
-INPUT_RETURN_VALUE HotkeyEscapeAtEscState(void* arg);
+INPUT_RETURN_VALUE HotkeyToggleatEscState(void* arg);
+INPUT_RETURN_VALUE HotkeyEscapeatEscState(void* arg);
 boolean IMSelectorAtEscPreFilter(void* arg, FcitxKeySym sym, unsigned int state, INPUT_RETURN_VALUE* retval);
 boolean IMSelectorAtEscPostFilter(void* arg, FcitxKeySym sym, unsigned int state, INPUT_RETURN_VALUE* retval);
 
@@ -107,7 +108,7 @@ void* AtEscCreate(FcitxInstance* instance)
     FcitxHotkeyHook thk;
     thk.arg = atEscState;
     thk.hotkey = atEscState->toggleHotkey;
-    thk.hotkeyhandle = HotkeyToggleAtEscState;
+    thk.hotkeyhandle = HotkeyToggleatEscState;
 
     FcitxKeyFilterHook prekf;
     prekf.arg = atEscState;
@@ -120,12 +121,12 @@ void* AtEscCreate(FcitxInstance* instance)
     FcitxInstanceRegisterHotkeyFilter(instance, thk);
     FcitxInstanceRegisterPreInputFilter(instance, prekf);
     FcitxInstanceRegisterPostInputFilter(instance, postkf);
-    // FcitxUIRegisterStatus(instance, atEscState, "@esc", _("@esc"), _("@esc"), ToggleAtEscState, GetAtEscEnabled);
+    // FcitxUIRegisterStatus(instance, atEscState, "@esc", _("@esc"), _("@esc"), ToggleatEscState, GetAtEscEnabled);
 
     return atEscState;
 }
 
-void ToggleAtEscState(void* arg)
+void ToggleatEscState(void* arg)
 {
     FcitxAtEsc* atEscState = (FcitxAtEsc*) arg;
     atEscState->enabled = !atEscState->enabled;
@@ -185,7 +186,7 @@ void ReloadAtEsc(void* arg)
     LoadAtEscConfig(atEscState);
 }
 
-INPUT_RETURN_VALUE HotkeyToggleAtEscState(void* arg)
+INPUT_RETURN_VALUE HotkeyToggleatEscState(void* arg)
 {
   // FcitxAtEsc* atEscState = (FcitxAtEsc*) arg;
 
@@ -196,7 +197,7 @@ INPUT_RETURN_VALUE HotkeyToggleAtEscState(void* arg)
   // }
   // else
   //     return IRV_TO_PROCESS;
-  ToggleAtEscState(arg);
+  ToggleatEscState(arg);
   return IRV_DO_NOTHING;
 }
 
@@ -209,7 +210,16 @@ boolean HandleAtEscFilter(void* arg, FcitxKeySym sym, unsigned int state, INPUT_
       FcitxLog(DEBUG, "hooked esc in pre filter");
       if(sym == FcitxKey_Escape){
         if(atEscState->commitPreedit){
-          FcitxUICommitPreedit(atEscState->owner);
+          if(AtEscUtilCurrentImIsSkk(atEscState->owner)){
+            const FcitxSkk *skk =
+              AtEscUtilGetSkkInstanceFromCurrentIM(atEscState->owner);
+            if(AtEscUtilIsSkkConvertMode(atEscState->owner,
+                  FcitxInstanceGetInputState(atEscState->owner))){
+              AtEscUtilSkkCommitForce(atEscState->owner, skk, retval);
+            }
+          }else{
+            FcitxUICommitPreedit(atEscState->owner);
+          }
         }
         FcitxInstanceCloseIM(atEscState->owner,
             FcitxInstanceGetCurrentIC(atEscState->owner));

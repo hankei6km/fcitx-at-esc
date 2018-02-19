@@ -5,7 +5,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 find_package(Fcitx 4.2.7 REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(Gettext REQUIRED)
-# pkg_check_modules(LIBSKK "libskk" REQUIRED)
+pkg_check_modules(LIBSKK "libskk" REQUIRED)
 
 _fcitx_add_uninstall_target()
 
