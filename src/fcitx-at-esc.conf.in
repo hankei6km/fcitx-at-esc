@@ -1,0 +1,8 @@
+[Addon]
+Name=fcitx-at-esc
+_GeneralName=@esc
+_Comment=Hook esc key to disable IME for Vim like key bind.
+Category=Module
+Enabled=True
+Library=fcitx-at-esc.so
+Type=SharedLibrary

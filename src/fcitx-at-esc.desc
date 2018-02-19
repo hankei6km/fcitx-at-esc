@@ -1,0 +1,22 @@
+[Basic/Enabled]
+Type=Boolean
+DefaultValue=True
+Description=Enabled
+
+[Basic/ForceDisableIME]
+Type=Boolean
+DefaultValue=False
+Description=Force disable IME
+
+[Basic/CommitPreedit]
+Type=Boolean
+DefaultValue=False
+Description=Commit preedit text
+
+[Basic/ToggleHotkey]
+Type=Hotkey
+DefaultValue=
+Description=Toggle for enable or disable
+
+[DescriptionFile]
+LocaleDomain=fcitx-at-esc
